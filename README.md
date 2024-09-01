@@ -19,7 +19,7 @@ Go to the project directory
 
 ## Usage
 
-Import the ``bulir-postman.json`` into json
+Import ``bulir-environment.json`` and ``bulir-postman.json`` into json
 
 
 # API Endpoints
