@@ -106,7 +106,7 @@
 							"urlencoded": []
 						},
 						"url": {
-							"raw": "{{host}}:{{port}}/services/{{service_id}}/book?bookingDate=2024-08-01T22:34:56Z",
+							"raw": "{{host}}:{{port}}/services/{{service_id}}/bookings?bookingDate=2024-08-01T22:34:56Z",
 							"host": [
 								"{{host}}"
 							],
@@ -114,7 +114,7 @@
 							"path": [
 								"services",
 								"{{service_id}}",
-								"book"
+								"bookings"
 							],
 							"query": [
 								{
@@ -132,7 +132,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}:{{port}}/services/{{service_id}}/book/{{booking_id}}",
+							"raw": "{{host}}:{{port}}/services/{{service_id}}/bookings/{{booking_id}}",
 							"host": [
 								"{{host}}"
 							],
@@ -140,7 +140,7 @@
 							"path": [
 								"services",
 								"{{service_id}}",
-								"book",
+								"bookings",
 								"{{booking_id}}"
 							]
 						}
@@ -150,10 +150,10 @@
 				{
 					"name": "cancel book",
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{host}}:{{port}}/services/{{service_id}}/book/{{booking_id}}/cancel",
+							"raw": "{{host}}:{{port}}/services/{{service_id}}/bookings/{{booking_id}}",
 							"host": [
 								"{{host}}"
 							],
@@ -161,9 +161,8 @@
 							"path": [
 								"services",
 								"{{service_id}}",
-								"book",
-								"{{booking_id}}",
-								"cancel"
+								"bookings",
+								"{{booking_id}}"
 							]
 						}
 					},
