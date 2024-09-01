@@ -4,7 +4,7 @@
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone git@github.com:kafir-coder/bulir-challenge.git
 ```
 
 Go to the project directory
