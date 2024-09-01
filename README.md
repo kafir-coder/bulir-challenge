@@ -51,3 +51,7 @@ Import the ``bulir-postman.json`` into json
 
 - **GET** `/services/bookings-history`
   - gets a paginated list history of bookings.
+ 
+## Authentication
+- **POST** `/auth/login`
+  - login into account
