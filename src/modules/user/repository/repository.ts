@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm'
 import { User } from '../../../models/user'
 import { AppDataSource } from '../../../data-source'
-import bcrypt from 'bcrypt'
+
 export interface IUserRepo {
   createUser(params: Partial<User>): Promise<User>
   getUser(id: string): Promise<User | null>
