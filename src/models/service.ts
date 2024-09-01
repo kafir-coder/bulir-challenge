@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import { User } from './user'
 import {
+  IsEnum,
   IsISO8601,
   IsNotEmpty,
   IsNumber,
@@ -80,18 +81,21 @@ export class BookServiceDto {
   bookingDate: Date
 }
 
+export enum SortDirections {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
 export class BookingHistoryParams {
   @IsOptional()
-  @IsNumber()
   page?: number
 
   @IsOptional()
-  @IsNumber()
   limit?: number
 
   @IsOptional()
   sortBy?: string
 
   @IsOptional()
-  sortDirection?: 'ASC' | 'DESC'
+  @IsEnum(SortDirections)
+  sortDirection?: SortDirections
 }
