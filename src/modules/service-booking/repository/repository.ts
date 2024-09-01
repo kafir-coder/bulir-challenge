@@ -5,6 +5,7 @@ import {
   CreateServiceDto,
   Service,
   ServiceBooking,
+  SortDirections,
 } from '../../../models/service'
 import { AppDataSource } from '../../../data-source'
 import { User } from '../../../models/user'
@@ -38,7 +39,12 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
   }
 
   async getService(id: string) {
-    return this.serviceRepo.findOneBy({ id })
+    return this.serviceRepo.findOne({
+      where: {
+        id,
+      },
+      relations: ['bookings', 'serviceProvider'],
+    })
   }
 
   async bookService(params: BookServiceDto) {
@@ -92,19 +98,17 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
           booking,
         )
 
-        // Return the ID of the saved booking
         return savedBooking.id
       },
     )
 
-    // Now you can return or use the bookingId
     return bookingId
   }
 
   async getServiceBooking(bookingId: string): Promise<ServiceBooking | null> {
     const booking = await this.serviceBookingRepo.findOne({
       where: { id: bookingId },
-      relations: ['client'],
+      relations: ['service', 'client', 'serviceProvider'],
     })
     return booking
   }
@@ -112,12 +116,11 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
   async cancelBooking(bookingId: string) {
     await this.serviceRepo.manager.transaction(
       async (transactionalEntityManager) => {
-        // Retrieve the booking
         const booking = await transactionalEntityManager.findOne(
           ServiceBooking,
           {
             where: { id: bookingId },
-            relations: ['client', 'serviceProvider', 'service'], // Ensure relations are loaded
+            relations: ['client', 'serviceProvider', 'service'],
           },
         )
 
@@ -125,23 +128,19 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
           throw new NotFound('Booking not found')
         }
 
-        // Check if the booking is already cancelled
         if (booking.status === 'cancelled') {
           throw new Forbidden('Booking is already cancelled')
         }
 
-        // Update the booking status to cancelled
         booking.status = 'cancelled'
         await transactionalEntityManager.save(ServiceBooking, booking)
 
         const serviceFee = Number(booking.service.fee)
-        // Increase the service provider's fee
         if (booking) {
           booking.serviceProvider.balance -= serviceFee
           await transactionalEntityManager.save(User, booking.serviceProvider)
         }
 
-        // Increment the client's balance
         if (booking.client) {
           booking.client.balance += serviceFee
           await transactionalEntityManager.save(User, booking.client)
@@ -154,18 +153,17 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     page = 1,
     limit = 10,
     sortBy = 'id',
-    sortDirection = 'DESC',
+    sortDirection = SortDirections.DESC,
   }: BookingHistoryParams): Promise<ServiceBooking[]> {
     const offset = (page - 1) * limit
 
-    // Query the database for the user's bookings
     const bookings = await this.serviceBookingRepo.find({
       order: {
         [sortBy]: sortDirection,
       },
       skip: offset,
       take: limit,
-      relations: ['service'], // Load relations if necessary
+      relations: ['service', 'client', 'serviceProvider'],
     })
 
     return bookings

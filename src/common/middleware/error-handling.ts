@@ -24,8 +24,6 @@ function errorHandler(
     return res.status(401).json({ error: err.message })
   }
 
-  // Handle other types of errors (e.g., internal server errors)
-  console.error(err) // Log the error for debugging purposes
   return res.status(500).json({ error: 'Internal server error' })
 }
 

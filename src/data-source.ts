@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm' // Example entity, replace with your own
+import { DataSource } from 'typeorm'
 import { User } from './models/user'
 import { Service, ServiceBooking } from './models/service'
 import dotenv from 'dotenv'
@@ -10,7 +10,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DATABASE_USER,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [User, Service, ServiceBooking], // Add your entities here
-  synchronize: true, // For development; disable in production
+  entities: [User, Service, ServiceBooking],
+  synchronize: true,
   logging: false,
 })

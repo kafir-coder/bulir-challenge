@@ -114,8 +114,8 @@ export const getBookingHistory = async (
 router.post('', createService)
 router.get('/booking-history', getBookingHistory)
 router.get('/:id', getService)
-router.post('/:id/book', bookService)
-router.post('/:id/book/:bid/cancel', cancelBooking)
-router.get('/:id/book/:bid', getBooking)
+router.post('/:id/bookings', bookService)
+router.delete('/:id/bookings/:bid', cancelBooking)
+router.get('/:id/bookings/:bid', getBooking)
 
 export const serviceBookingHandlers = router

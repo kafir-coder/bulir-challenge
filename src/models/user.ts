@@ -32,11 +32,9 @@ export class User extends Base {
   @Column()
   balance: number
 
-  // If the user is a service provider, they can have multiple services
   @OneToMany(() => Service, (service) => service.serviceProvider)
   services: Service[]
 
-  // If the user is a client, they can make multiple bookings
   @OneToMany(() => ServiceBooking, (booking) => booking.client)
   bookings: ServiceBooking[]
 }

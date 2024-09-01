@@ -23,11 +23,9 @@ export class Service extends Base {
   @Column('decimal')
   fee: number
 
-  // Many services can belong to one service provider (user)
   @ManyToOne(() => User, (user) => user.services)
   serviceProvider: User
 
-  // One service can have many bookings
   @OneToMany(() => ServiceBooking, (booking) => booking.service)
   bookings: ServiceBooking[]
 }
@@ -40,11 +38,9 @@ export class ServiceBooking extends Base {
   @Column()
   status: 'pending' | 'cancelled'
 
-  // Many bookings can be made by one client
   @ManyToOne(() => User, (user) => user.bookings)
   client: User
 
-  // Many bookings can belong to one service
   @ManyToOne(() => Service, (service) => service.bookings)
   service: Service
 
@@ -77,7 +73,7 @@ export class BookServiceDto {
 
   @ValidateIf((o) => typeof o.bookingDate === 'string')
   @IsNotEmpty()
-  @IsISO8601() // Ensures the string is in ISO 8601 format
+  @IsISO8601()
   bookingDate: Date
 }
 
