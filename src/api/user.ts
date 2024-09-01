@@ -1,0 +1,48 @@
+import { NextFunction, Request, Response, Router } from 'express'
+import { serviceBookingSvc, userSvc } from './api'
+import { constants } from 'http2'
+import { validate } from 'class-validator'
+import { CreateUserDto } from '../models/user'
+import { RequestContext } from '../models/request'
+const router = Router()
+
+export const createUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ctx = req.context as unknown as RequestContext
+    const dto = Object.assign(new CreateUserDto(), req.body) as CreateUserDto
+    dto.updateNif()
+    const errors = await validate(dto)
+
+    if (errors.length > 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json(errors)
+    }
+    const user = await userSvc.createUser(ctx, dto)
+    return res.status(constants.HTTP_STATUS_CREATED).json(user)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ctx = req.context as unknown as RequestContext
+    const id = req.params.id
+    const user = await userSvc.getUser(ctx, id)
+    return res.status(constants.HTTP_STATUS_CREATED).json(user)
+  } catch (error) {
+    next(error)
+  }
+}
+
+router.post('', createUser)
+router.get('/:id', getUser)
+
+export const userHandlers = router
