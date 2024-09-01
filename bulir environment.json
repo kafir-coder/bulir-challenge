@@ -1,0 +1,39 @@
+{
+	"id": "2a507f3f-f5e4-4e86-95cf-5ececd283731",
+	"name": "bulir environment",
+	"values": [
+		{
+			"key": "port",
+			"value": "8080",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "host",
+			"value": "localhost",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "service_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "booking_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2024-09-01T20:07:18.223Z",
+	"_postman_exported_using": "Postman/10.24.27"
+}
