@@ -9,8 +9,13 @@ import { RequestContext } from '../../models/request'
 export class AuthSvc implements IAuthSvc {
   constructor(private readonly userRepo: IUserRepo) {}
   async login(_ctx: RequestContext, params: LoginDto) {
-    const user = await this.userRepo.getByEmail(params.email)
+    let user
 
+    if (params.nif) {
+      user = await this.userRepo.getUserByNif(params.nif)
+    } else {
+      user = await this.userRepo.getByEmail(params.email)
+    }
     if (!user) {
       throw new Unauthorized('User not found')
     }
