@@ -229,18 +229,22 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
   ): Promise<{ serviceBookings: ServiceBooking[]; total: number }> {
     const queryBuilder = this.serviceBookingRepo
       .createQueryBuilder('serviceBooking')
-      .leftJoinAndSelect('serviceBooking.Client', 'Client')
+      .leftJoinAndSelect('serviceBooking.client', 'client')
+      .leftJoinAndSelect('serviceBooking.serviceProvider', 'serviceProvider')
 
     if (filter.clientId) {
-      queryBuilder.andWhere('service.client.id = :clientId', {
+      queryBuilder.andWhere('serviceBooking.client.id = :clientId', {
         clientId: filter.clientId,
       })
     }
 
     if (filter.serviceProviderId) {
-      queryBuilder.andWhere('service.serviceProvider.id = :serviceProviderId', {
-        serviceProviderId: filter.serviceProviderId,
-      })
+      queryBuilder.andWhere(
+        'serviceBooking.serviceProvider.id = :serviceProviderId',
+        {
+          serviceProviderId: filter.serviceProviderId,
+        },
+      )
     }
 
     const page = filter.page
