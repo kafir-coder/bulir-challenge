@@ -4,6 +4,7 @@ import { constants } from 'http2'
 import { validate } from 'class-validator'
 import { CreateUserDto } from '../models/user'
 import { RequestContext } from '../models/request'
+import authenticateJWT from '../utils/http/middleware/jwt'
 const router = Router()
 
 export const createUser = async (
@@ -42,7 +43,22 @@ export const getUser = async (
   }
 }
 
+export const profile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ctx = req.context as unknown as RequestContext
+    const user = await userSvc.profile(ctx)
+    return res.status(constants.HTTP_STATUS_OK).json(user)
+  } catch (error) {
+    next(error)
+  }
+}
+
 router.post('', createUser)
+router.get('/profile', authenticateJWT, profile)
 router.get('/:id', getUser)
 
 export const userHandlers = router

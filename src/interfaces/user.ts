@@ -5,4 +5,5 @@ export interface IUserSvc {
   createUser(ctx: RequestContext, params: CreateUserDto): Promise<User>
   getUser(ctx: RequestContext, id: string): Promise<User>
   getBalance(ctx: RequestContext, id: string): Promise<number>
+  profile(ctx: RequestContext): Promise<User>
 }

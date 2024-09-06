@@ -36,6 +36,11 @@ export class UserSvc implements IUserSvc {
       balance: params.balance,
     })
   }
+
+  async profile(ctx: RequestContext) {
+    const user = await this.getUser(ctx, ctx.user?.id!)
+    return user
+  }
   async getUser(_ctx: RequestContext, id: string) {
     const user = await this.repo.getUser(id)
 
