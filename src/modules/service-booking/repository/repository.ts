@@ -82,6 +82,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     const limit = filter.limit
     queryBuilder.skip((page - 1) * limit).take(limit)
 
+    queryBuilder.orderBy('DESC')
     const total = await queryBuilder.getCount()
 
     const services = await queryBuilder.getMany()
@@ -231,6 +232,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
       .createQueryBuilder('serviceBooking')
       .leftJoinAndSelect('serviceBooking.client', 'client')
       .leftJoinAndSelect('serviceBooking.serviceProvider', 'serviceProvider')
+      .leftJoinAndSelect('serviceBooking.service', 'service')
 
     if (filter.clientId) {
       queryBuilder.andWhere('serviceBooking.client.id = :clientId', {
@@ -252,6 +254,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     queryBuilder.skip((page - 1) * limit).take(limit)
 
     const total = await queryBuilder.getCount()
+    queryBuilder.orderBy('DESC')
 
     const serviceBookings = await queryBuilder.getMany()
 
