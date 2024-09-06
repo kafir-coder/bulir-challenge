@@ -7,7 +7,7 @@ import * as jwt from 'jsonwebtoken'
 import { Unauthorized } from '../../common/errors/unathourized'
 import { RequestContext } from '../../models/request'
 import { User } from '../../models/user'
-import { ErrorMessages } from '../service-booking/error-messages'
+import { ErrorMessages } from '../../common/errors/error-messages'
 export class AuthSvc implements IAuthSvc {
   constructor(private readonly userRepo: IUserRepo) {}
   async login(_ctx: RequestContext, params: LoginDto) {

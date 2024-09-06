@@ -12,7 +12,7 @@ import { IServiceManagmentRepo } from './repository/repository'
 import { NotFound } from '../../common/errors/not-found'
 import { Forbidden } from '../../common/errors/forbiden'
 import { RequestContext, UserRole } from '../../models/request'
-import { ErrorMessages } from './error-messages'
+import { ErrorMessages } from '../../common/errors/error-messages'
 const { randomUUID } = require('crypto')
 
 export class ServiceManagmentSvc implements IServiceManagmentSvc {

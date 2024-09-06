@@ -11,7 +11,7 @@ import { AppDataSource } from '../../../data-source'
 import { User } from '../../../models/user'
 import { NotFound } from '../../../common/errors/not-found'
 import { Forbidden } from '../../../common/errors/forbiden'
-import { ErrorMessages } from '../error-messages'
+import { ErrorMessages } from '../../../common/errors/error-messages'
 
 export interface IServiceManagmentRepo {
   createService(params: Partial<Service>, providerId: string): Promise<Service>
@@ -82,7 +82,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     const limit = filter.limit
     queryBuilder.skip((page - 1) * limit).take(limit)
 
-    queryBuilder.orderBy('DESC')
+    queryBuilder.orderBy('service.created_at', 'DESC')
     const total = await queryBuilder.getCount()
 
     const services = await queryBuilder.getMany()
@@ -154,7 +154,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
         const serviceProviderBalance = Number(serviceProvider.balance)
 
         if (clientBalance < serviceFee) {
-          throw new Forbidden(ErrorMessages.already_cancelled_booking)
+          throw new Forbidden(ErrorMessages.insufficient_balance)
         }
 
         client.balance = clientBalance - serviceFee
@@ -254,7 +254,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     queryBuilder.skip((page - 1) * limit).take(limit)
 
     const total = await queryBuilder.getCount()
-    queryBuilder.orderBy('DESC')
+    queryBuilder.orderBy('serviceBooking.created_at', 'DESC')
 
     const serviceBookings = await queryBuilder.getMany()
 

@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 import { BadRequest } from '../../common/errors/bad-request'
 import { NotFound } from '../../common/errors/not-found'
 import { RequestContext, UserRole } from '../../models/request'
-import { ErrorMessages } from '../service-booking/error-messages'
+import { ErrorMessages } from '../../common/errors/error-messages'
 export class UserSvc implements IUserSvc {
   constructor(private readonly repo: IUserRepo) {}
 
