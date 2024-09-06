@@ -6,10 +6,12 @@ import bcrypt from 'bcryptjs'
 import * as jwt from 'jsonwebtoken'
 import { Unauthorized } from '../../common/errors/unathourized'
 import { RequestContext } from '../../models/request'
+import { User } from '../../models/user'
+import { ErrorMessages } from '../service-booking/error-messages'
 export class AuthSvc implements IAuthSvc {
   constructor(private readonly userRepo: IUserRepo) {}
   async login(_ctx: RequestContext, params: LoginDto) {
-    let user
+    let user: User | null
 
     if (params.nif) {
       user = await this.userRepo.getUserByNif(params.nif)
@@ -17,12 +19,12 @@ export class AuthSvc implements IAuthSvc {
       user = await this.userRepo.getByEmail(params.email)
     }
     if (!user) {
-      throw new Unauthorized('User not found')
+      throw new Unauthorized(ErrorMessages.resource_not_found)
     }
 
     const isPasswordValid = await bcrypt.compare(params.password, user.password)
     if (!isPasswordValid) {
-      throw new Unauthorized('Password is not valid')
+      throw new Unauthorized('Password invalida')
     }
 
     const payload = { id: user.id, email: user.email, role: user.role }
@@ -33,6 +35,8 @@ export class AuthSvc implements IAuthSvc {
 
     return {
       accessToken: token,
+      name: user.fullName,
+      role: user.role,
       expiresIn: token_expiration_time,
     }
   }

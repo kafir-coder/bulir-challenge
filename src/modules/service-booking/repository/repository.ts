@@ -2,23 +2,32 @@ import { Repository } from 'typeorm'
 import {
   BookingHistoryParams,
   BookServiceDto,
-  CreateServiceDto,
   Service,
   ServiceBooking,
-  SortDirections,
+  ServiceFilterDto,
+  UpdateServiceDto,
 } from '../../../models/service'
 import { AppDataSource } from '../../../data-source'
 import { User } from '../../../models/user'
 import { NotFound } from '../../../common/errors/not-found'
 import { Forbidden } from '../../../common/errors/forbiden'
+import { ErrorMessages } from '../error-messages'
 
 export interface IServiceManagmentRepo {
   createService(params: Partial<Service>, providerId: string): Promise<Service>
   getService(id: string): Promise<Service | null>
+  existsByName(name: string): Promise<boolean>
   bookService(params: BookServiceDto): Promise<string>
+  listServices(
+    filter: ServiceFilterDto,
+  ): Promise<{ services: Service[]; total: number }>
+  updateService(id: string, updateData: UpdateServiceDto): Promise<Service>
+  deleteService(id: string): void
   getServiceBooking(bookingId: string): Promise<ServiceBooking | null>
   cancelBooking(id: string): void
-  getBookingHistory(params: BookingHistoryParams): Promise<ServiceBooking[]>
+  getBookingHistory(
+    filter: BookingHistoryParams,
+  ): Promise<{ serviceBookings: ServiceBooking[]; total: number }>
 }
 
 export class ServiceManagmentRepository implements IServiceManagmentRepo {
@@ -29,7 +38,73 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     this.serviceRepo = AppDataSource.getRepository(Service)
     this.serviceBookingRepo = AppDataSource.getRepository(ServiceBooking)
   }
+  existsByName(name: string): Promise<boolean> {
+    return this.serviceRepo.exists({ where: { name } })
+  }
+  async deleteService(id: string) {
+    await this.serviceRepo.delete({ id })
+  }
 
+  async listServices(
+    filter: ServiceFilterDto,
+  ): Promise<{ services: Service[]; total: number }> {
+    const queryBuilder = this.serviceRepo
+      .createQueryBuilder('service')
+      .leftJoinAndSelect('service.serviceProvider', 'serviceProvider')
+
+    if (filter.name) {
+      queryBuilder.andWhere('service.name ILIKE :name', {
+        name: `%${filter.name}%`,
+      })
+    }
+
+    if (filter.description) {
+      queryBuilder.andWhere('service.description ILIKE :description', {
+        description: `%${filter.description}%`,
+      })
+    }
+
+    if (filter.minFee) {
+      queryBuilder.andWhere('service.fee >= :minFee', { minFee: filter.minFee })
+    }
+
+    if (filter.maxFee) {
+      queryBuilder.andWhere('service.fee <= :maxFee', { maxFee: filter.maxFee })
+    }
+
+    if (filter.serviceProviderId) {
+      queryBuilder.andWhere('service.serviceProvider.id = :serviceProviderId', {
+        serviceProviderId: filter.serviceProviderId,
+      })
+    }
+
+    const page = filter.page
+    const limit = filter.limit
+    queryBuilder.skip((page - 1) * limit).take(limit)
+
+    const total = await queryBuilder.getCount()
+
+    const services = await queryBuilder.getMany()
+
+    return { services, total }
+  }
+
+  async updateService(
+    id: string,
+    updateData: UpdateServiceDto,
+  ): Promise<Service> {
+    const service = await this.serviceRepo.findOneBy({ id })
+
+    if (!service) {
+      throw new NotFound(ErrorMessages.resource_not_found)
+    }
+
+    if (updateData.name) service.name = updateData.name
+    if (updateData.description) service.description = updateData.description
+    if (updateData.fee !== undefined) service.fee = updateData.fee
+
+    return await this.serviceRepo.save(service)
+  }
   async createService(params: Partial<Service>, providerId: string) {
     const service = await this.serviceRepo.create({
       serviceProvider: { id: providerId },
@@ -60,7 +135,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
           id: clientId,
         })
         if (!service || !client) {
-          throw new NotFound('Service or Client not found')
+          throw new NotFound(ErrorMessages.resource_not_found)
         }
 
         const serviceProvider = await transactionalEntityManager.findOneBy(
@@ -70,7 +145,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
           },
         )
         if (!serviceProvider) {
-          throw new NotFound('Service Provider not found')
+          throw new NotFound(ErrorMessages.resource_not_found)
         }
 
         const serviceFee = Number(service.fee)
@@ -78,7 +153,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
         const serviceProviderBalance = Number(serviceProvider.balance)
 
         if (clientBalance < serviceFee) {
-          throw new Forbidden('Insufficient balance')
+          throw new Forbidden(ErrorMessages.already_cancelled_booking)
         }
 
         client.balance = clientBalance - serviceFee
@@ -125,11 +200,11 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
         )
 
         if (!booking) {
-          throw new NotFound('Booking not found')
+          throw new NotFound(ErrorMessages.resource_not_found)
         }
 
         if (booking.status === 'cancelled') {
-          throw new Forbidden('Booking is already cancelled')
+          throw new Forbidden(ErrorMessages.already_cancelled_booking)
         }
 
         booking.status = 'cancelled'
@@ -149,23 +224,33 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     )
   }
 
-  async getBookingHistory({
-    page = 1,
-    limit = 10,
-    sortBy = 'id',
-    sortDirection = SortDirections.DESC,
-  }: BookingHistoryParams): Promise<ServiceBooking[]> {
-    const offset = (page - 1) * limit
+  async getBookingHistory(
+    filter: BookingHistoryParams,
+  ): Promise<{ serviceBookings: ServiceBooking[]; total: number }> {
+    const queryBuilder = this.serviceBookingRepo
+      .createQueryBuilder('serviceBooking')
+      .leftJoinAndSelect('serviceBooking.Client', 'Client')
 
-    const bookings = await this.serviceBookingRepo.find({
-      order: {
-        [sortBy]: sortDirection,
-      },
-      skip: offset,
-      take: limit,
-      relations: ['service', 'client', 'serviceProvider'],
-    })
+    if (filter.clientId) {
+      queryBuilder.andWhere('service.client.id = :clientId', {
+        clientId: filter.clientId,
+      })
+    }
 
-    return bookings
+    if (filter.serviceProviderId) {
+      queryBuilder.andWhere('service.serviceProvider.id = :serviceProviderId', {
+        serviceProviderId: filter.serviceProviderId,
+      })
+    }
+
+    const page = filter.page
+    const limit = filter.limit
+    queryBuilder.skip((page - 1) * limit).take(limit)
+
+    const total = await queryBuilder.getCount()
+
+    const serviceBookings = await queryBuilder.getMany()
+
+    return { serviceBookings, total }
   }
 }

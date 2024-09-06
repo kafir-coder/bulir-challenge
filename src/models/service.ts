@@ -10,7 +10,7 @@ import {
   IsUUID,
   ValidateIf,
 } from 'class-validator'
-import { Base } from './base'
+import { Base, Pagination } from './base'
 
 @Entity()
 export class Service extends Base {
@@ -77,21 +77,50 @@ export class BookServiceDto {
   bookingDate: Date
 }
 
-export enum SortDirections {
-  ASC = 'ASC',
-  DESC = 'DESC',
+export class BookingHistoryParams extends Pagination {
+  serviceProviderId: string
+  clientId: string
 }
-export class BookingHistoryParams {
+
+export class ServiceFilterDto extends Pagination {
   @IsOptional()
-  page?: number
+  @IsString()
+  name?: string
 
   @IsOptional()
-  limit?: number
+  @IsString()
+  description?: string
 
   @IsOptional()
-  sortBy?: string
+  @IsNumber()
+  minFee?: number
 
   @IsOptional()
-  @IsEnum(SortDirections)
-  sortDirection?: SortDirections
+  @IsNumber()
+  maxFee?: number
+
+  @IsOptional()
+  @IsString()
+  serviceProviderId?: string
+}
+
+export interface PaginatedResult<T> {
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export class UpdateServiceDto {
+  @IsOptional()
+  @IsString()
+  name?: string
+
+  @IsOptional()
+  @IsString()
+  description?: string
+
+  @IsOptional()
+  @IsNumber()
+  fee?: number
 }

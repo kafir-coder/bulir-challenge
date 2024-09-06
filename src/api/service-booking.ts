@@ -5,6 +5,8 @@ import {
   BookingHistoryParams,
   BookServiceDto,
   CreateServiceDto,
+  ServiceFilterDto,
+  UpdateServiceDto,
 } from '../models/service'
 import { validate } from 'class-validator'
 import { RequestContext } from '../models/request'
@@ -43,6 +45,67 @@ export const getService = async (
   }
 }
 
+export const listServices = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ctx = req.context as unknown as RequestContext
+
+    const dto = Object.assign(
+      new BookingHistoryParams(),
+      req.query,
+    ) as ServiceFilterDto
+
+    const errors = await validate(dto)
+    if (errors.length > 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json(errors)
+    }
+    const services = await serviceBookingSvc.listServices(ctx, dto)
+    return res.status(constants.HTTP_STATUS_OK).json(services)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const updatedService = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ctx = req.context as unknown as RequestContext
+    const dto = Object.assign(
+      new UpdateServiceDto(),
+      req.body,
+    ) as UpdateServiceDto
+
+    const errors = await validate(dto)
+    if (errors.length > 0) {
+      return res.status(constants.HTTP_STATUS_BAD_REQUEST).json(errors)
+    }
+    const result = serviceBookingSvc.updateService(ctx, req.params.id, dto)
+    return res.status(constants.HTTP_STATUS_OK).json(result)
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deleteService = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const ctx = req.context as unknown as RequestContext
+    await serviceBookingSvc.deleteService(ctx, req.params.id)
+    return res.sendStatus(constants.HTTP_STATUS_OK)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const bookService = async (
   req: Request,
   res: Response,
@@ -50,7 +113,7 @@ export const bookService = async (
 ) => {
   try {
     const ctx = req.context as unknown as RequestContext
-    const dto = Object.assign(new BookServiceDto(), req.query) as BookServiceDto
+    const dto = Object.assign(new BookServiceDto(), req.body) as BookServiceDto
     const errors = await validate(dto)
     if (errors.length > 0) {
       return res.status(constants.HTTP_STATUS_BAD_REQUEST).json(errors)
@@ -112,8 +175,11 @@ export const getBookingHistory = async (
 }
 
 router.post('', createService)
+router.get('', listServices)
 router.get('/booking-history', getBookingHistory)
 router.get('/:id', getService)
+router.patch('/:id', updatedService)
+router.delete('/:id', deleteService)
 router.post('/:id/bookings', bookService)
 router.delete('/:id/bookings/:bid', cancelBooking)
 router.get('/:id/bookings/:bid', getBooking)

@@ -1,3 +1,4 @@
+import { IsEnum, IsNumber, IsOptional, Min } from 'class-validator'
 import {
   CreateDateColumn,
   DeleteDateColumn,
@@ -19,4 +20,28 @@ export class Base {
 
   @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
   deletedAt: Date
+}
+
+export enum SortDirections {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export class Pagination {
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  page: number = 1
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  limit: number = 10
+
+  @IsOptional()
+  sortBy?: string
+
+  @IsOptional()
+  @IsEnum(SortDirections)
+  sortDirection?: SortDirections
 }

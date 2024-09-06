@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs'
 import { BadRequest } from '../../common/errors/bad-request'
 import { NotFound } from '../../common/errors/not-found'
 import { RequestContext, UserRole } from '../../models/request'
+import { ErrorMessages } from '../service-booking/error-messages'
 export class UserSvc implements IUserSvc {
   constructor(private readonly repo: IUserRepo) {}
 
@@ -13,13 +14,13 @@ export class UserSvc implements IUserSvc {
     const emailExists = await this.repo.emailExists(params.email)
 
     if (emailExists) {
-      throw new BadRequest(`User ${params.email} already exists`)
+      throw new BadRequest(ErrorMessages.user_already_exists)
     }
 
     if (params.role === UserRole.ServiceProvider) {
       const nifExists = await this.repo.nifExists(params.nif)
       if (nifExists) {
-        throw new BadRequest(`User with nif ${params.nif} already exists`)
+        throw new BadRequest(ErrorMessages.user_already_exists)
       }
     }
 
@@ -39,7 +40,7 @@ export class UserSvc implements IUserSvc {
     const user = await this.repo.getUser(id)
 
     if (!user) {
-      throw new NotFound(`User ${id} not found`)
+      throw new NotFound(ErrorMessages.resource_not_found)
     }
 
     return user
@@ -48,7 +49,7 @@ export class UserSvc implements IUserSvc {
     const balance = await this.repo.getBalance(id)
 
     if (!balance) {
-      throw new NotFound(`User ${id} not found`)
+      throw new NotFound(ErrorMessages.resource_not_found)
     }
     return balance
   }

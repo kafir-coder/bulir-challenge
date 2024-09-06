@@ -23,8 +23,7 @@ function errorHandler(
   if (error.isUnauthorized) {
     return res.status(401).json({ error: err.message })
   }
-
-  return res.status(500).json({ error: 'Internal server error' })
+  return res.status(500).json({ error: 'Internal server error porra' })
 }
 
 export default errorHandler
