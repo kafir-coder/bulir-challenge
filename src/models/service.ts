@@ -89,6 +89,10 @@ export class ServiceFilterDto extends Pagination {
 
   @IsOptional()
   @IsString()
+  s?: string
+
+  @IsOptional()
+  @IsString()
   description?: string
 
   @IsOptional()

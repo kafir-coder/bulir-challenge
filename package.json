@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "watch": "tsc --watch",
-    "format": "prettier --write 'src/**/*.ts'"
+    "format": "prettier --write 'src/**/*.ts'",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -16,6 +17,8 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.5.1",
     "prettier": "3.3.3",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
@@ -29,6 +32,7 @@
     "morgan": "^1.10.0",
     "pg": "^8.12.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "typeorm-ts-node-commonjs": "^0.3.20"
   }
 }
