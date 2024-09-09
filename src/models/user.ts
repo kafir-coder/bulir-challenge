@@ -6,6 +6,7 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateIf,
 } from 'class-validator'
@@ -71,4 +72,27 @@ export class CreateUserDto {
       this.nif = ''
     }
   }
+}
+
+export class UpdateUserdto {
+  @IsOptional()
+  @IsNumber()
+  balance: number
+  @IsString()
+  @IsOptional()
+  fullname: string
+
+  @IsEmail()
+  @IsOptional()
+  email: string
+
+  @IsString()
+  @IsEnum(UserRole)
+  @IsOptional()
+  role: UserRole
+
+  @ValidateIf((o) => o.role === UserRole.ServiceProvider)
+  @IsString()
+  @IsOptional()
+  nif: string
 }

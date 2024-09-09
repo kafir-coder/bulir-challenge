@@ -10,4 +10,5 @@ export const enum ErrorMessages {
   only_owner_can_cancel = 'Sem permissão para cancelar a marcação',
   resource_not_found = 'recurso não encontrado',
   user_already_exists = 'Usuário já existente',
+  must_be_balance_owner = 'Apenas o proprietario da conta pode alterar o balanco',
 }

@@ -1,12 +1,13 @@
 import { randomUUID } from 'crypto'
 import { IUserSvc } from '../../interfaces/user'
-import { CreateUserDto, User } from '../../models/user'
+import { CreateUserDto, UpdateUserdto, User } from '../../models/user'
 import { IUserRepo } from './repository/repository'
 import bcrypt from 'bcryptjs'
 import { BadRequest } from '../../common/errors/bad-request'
 import { NotFound } from '../../common/errors/not-found'
 import { RequestContext, UserRole } from '../../models/request'
 import { ErrorMessages } from '../../common/errors/error-messages'
+import { Forbidden } from 'http-errors'
 export class UserSvc implements IUserSvc {
   constructor(private readonly repo: IUserRepo) {}
 
@@ -50,12 +51,19 @@ export class UserSvc implements IUserSvc {
 
     return user
   }
-  async getBalance(_ctx: RequestContext, id: string) {
+  async getBalance(ctx: RequestContext, id: string) {
     const balance = await this.repo.getBalance(id)
 
     if (!balance) {
       throw new NotFound(ErrorMessages.resource_not_found)
     }
     return balance
+  }
+
+  async updateUser(ctx: RequestContext, id: string, params: UpdateUserdto) {
+    if (ctx.user?.id != id) {
+      throw new Forbidden(ErrorMessages.must_be_balance_owner)
+    }
+    await this.repo.updateUser(id, params)
   }
 }

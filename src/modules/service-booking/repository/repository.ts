@@ -81,7 +81,7 @@ export class ServiceManagmentRepository implements IServiceManagmentRepo {
     if (filter.s) {
       queryBuilder.andWhere(
         'service.name ILIKE :query OR service.description ILIKE :query',
-        { query: `%${filter.s}%` }, 
+        { query: `%${filter.s}%` },
       )
     }
 
